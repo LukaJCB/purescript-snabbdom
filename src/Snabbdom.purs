@@ -2,7 +2,7 @@ module Snabbdom where
 
 import Control.Monad.Eff (Eff)
 import DOM.Node.Types (Element)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Data.StrMap (StrMap)
 import Data.Unit (Unit)
 
@@ -10,7 +10,7 @@ newtype VNodeProxy e = VNodeProxy
   { sel :: String
   , data :: VNodeData e
   , children :: Array (VNodeProxy e)
-  , elm :: Maybe Element
+  , elm :: Element
   }
 
 type VNodeData e =
@@ -29,7 +29,10 @@ type VNodeHookObject e =
   , update :: Maybe (VNodeProxy e -> VNodeProxy e -> Eff e Unit)
   }
 
+foreign import getElementImpl :: forall a e. VNodeProxy e -> (a -> Maybe a) -> Maybe a -> Maybe Element
 
+getElement :: forall e. VNodeProxy e -> Maybe Element
+getElement proxy = getElementImpl proxy Just Nothing
 
 foreign import data VNodeHookObjectProxy :: # ! -> *
 

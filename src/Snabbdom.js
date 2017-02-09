@@ -19,7 +19,17 @@ function transformEff2(fn) {
     return fn(a)(b)()
   }
 }
-
+exports.getElementImpl = function(proxy) {
+  return function(just) {
+    return function(nothing) {
+      if (proxy.elm){
+        return just(proxy.elm)
+      } else {
+        return nothing
+      }
+    }
+  }
+}
 
 exports.text = function(text) {
   return text
