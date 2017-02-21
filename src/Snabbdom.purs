@@ -47,3 +47,5 @@ foreign import patchInitialSelector :: forall e. String -> VNodeProxy e -> Eff e
 foreign import text :: forall e. String -> VNodeProxy (|e)
 
 foreign import h :: forall e. String -> VNodeData e -> Array (VNodeProxy e) -> VNodeProxy e
+
+foreign import updateValueHook :: forall e. VNodeProxy e -> VNodeProxy e -> Eff e Unit

@@ -87,3 +87,15 @@ exports.patchInitialSelector = function (sel) {
 }
 
 exports.patchInitial = exports.patch
+
+exports.updateValueHook = function(old) {
+  return function(proxy){
+    return function () {
+      if (proxy.elm){
+        if(proxy.elm.value != proxy.elm.getAttribute("value")){
+          proxy.elm.value = proxy.elm.getAttribute("value")
+        }
+      }
+    }
+  }
+}
