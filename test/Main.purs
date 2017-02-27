@@ -24,7 +24,7 @@ import Test.QuickCheck (Result(..), (===))
 import Test.Unit (suite, test)
 import Test.Unit.Assert (assert)
 import Test.Unit.Console (TESTOUTPUT)
-import Test.Unit.Main (runTest)
+import Test.Unit.Main (exit, runTest)
 import Test.Unit.QuickCheck (quickCheck)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -41,15 +41,17 @@ patchAndGetElement proxy = do
 
 
 main :: Eff (console :: CONSOLE, testOutput :: TESTOUTPUT, avar :: AVAR, dom :: DOM, vdom :: VDOM, random :: RANDOM) Unit
-main = runTest do
-  suite "Snabbdom" do
-    test "DOM patching" do
-        let message = "Hello World"
-            vNode = createVNode message
-            eff = patchAndGetElement vNode
-        elem <- (liftEff eff)
-        assert "Message should be patched into the DOM" (isJust elem)
-        quickCheck (maybe (Failed "failure") (compareTextContent message) elem)
+main = do
+  runTest do
+    suite "Snabbdom" do
+          test "DOM patching" do
+              let message = "Hello World"
+                  vNode = createVNode message
+                  eff = patchAndGetElement vNode
+              elem <- (liftEff eff)
+              assert "Message should be patched into the DOM" (isJust elem)
+              quickCheck (maybe (Failed "failure") (compareTextContent message) elem)
+  (exit 0)
 
 
 
