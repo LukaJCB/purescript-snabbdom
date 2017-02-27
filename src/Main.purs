@@ -3,13 +3,12 @@ module Main where
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Exception (EXCEPTION, throw)
-import DOM (DOM)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (empty, singleton)
 import Prelude (Unit)
-import Snabbdom (VNodeProxy, h, patchInitialSelector, text, toVNodeEventObject, toVNodeHookObjectProxy)
+import Snabbdom (VDOM, VNodeProxy, h, patchInitialSelector, text, toVNodeEventObject, toVNodeHookObjectProxy)
 
-main :: forall e. Eff (dom :: DOM, err:: EXCEPTION, console :: CONSOLE | e) Unit
+main :: forall e. Eff (err:: EXCEPTION, console :: CONSOLE, vdom :: VDOM | e) Unit
 main = do
   patchInitialSelector "#app" parent
 

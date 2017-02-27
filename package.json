@@ -11,7 +11,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "pulp browserify -I test -m Test.Main -t index.js && phantomjs index.js"
   },
   "author": "Luka Jacobowitz",
   "license": "Apache-2.0"
