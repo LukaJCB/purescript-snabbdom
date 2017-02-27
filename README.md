@@ -1,0 +1,17 @@
+# purescript-assert
+
+[![Latest release](http://img.shields.io/github/release/LukaJCB/purescript-snabbdom.svg)](https://github.com/LukaJCB/purescript-snabbdom/releases)
+
+
+A small type safe wrapper around Snabbdom.
+
+## Installation
+
+```
+npm install snabbdom
+bower install purescript-snabbdom
+```
+
+## Documentation
+
+Module documentation is [published on Pursuit](https://pursuit.purescript.org/packages/purescript-snabbdom/).
