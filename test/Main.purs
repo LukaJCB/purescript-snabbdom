@@ -5,6 +5,7 @@ import Control.Monad.Aff.AVar (AVAR)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
+import Control.Monad.Eff.Random (RANDOM)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
 import DOM (DOM)
 import DOM.HTML (window)
@@ -19,10 +20,12 @@ import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.Nullable (toMaybe)
 import Data.StrMap (empty)
 import Snabbdom (VDOM, VNodeProxy, h, patchInitial, text, toVNodeEventObject, toVNodeHookObjectProxy)
+import Test.QuickCheck (Result(..), (===))
 import Test.Unit (suite, test)
 import Test.Unit.Assert (assert)
 import Test.Unit.Console (TESTOUTPUT)
 import Test.Unit.Main (runTest)
+import Test.Unit.QuickCheck (quickCheck)
 import Unsafe.Coerce (unsafeCoerce)
 
 patchAndGetElement :: forall e. VNodeProxy (dom :: DOM | e) -> Eff (dom:: DOM, vdom :: VDOM | e) (Maybe Element)
@@ -37,22 +40,23 @@ patchAndGetElement proxy = do
   pure (toMaybe elem)
 
 
-main :: Eff (console :: CONSOLE, testOutput :: TESTOUTPUT, avar :: AVAR, dom :: DOM, vdom :: VDOM) Unit
+main :: Eff (console :: CONSOLE, testOutput :: TESTOUTPUT, avar :: AVAR, dom :: DOM, vdom :: VDOM, random :: RANDOM) Unit
 main = runTest do
   suite "Snabbdom" do
     test "DOM patching" do
-      let message = "Hello World"
-          vNode = createVNode message
-          eff = patchAndGetElement vNode
-      elem <- (liftEff eff)
-      assert "Message should be patched into the DOM" (isJust elem)
-      assert "Message should still be the same" (maybe false (compareTextContent message) elem)
+        let message = "Hello World"
+            vNode = createVNode message
+            eff = patchAndGetElement vNode
+        elem <- (liftEff eff)
+        assert "Message should be patched into the DOM" (isJust elem)
+        quickCheck (maybe (Failed "failure") (compareTextContent message) elem)
 
 
-compareTextContent :: String -> Element -> Boolean
+
+compareTextContent :: String -> Element -> Result
 compareTextContent message element =
   let node = elementToNode element
-  in unsafePerformEff (textContent node) == message
+  in unsafePerformEff (textContent node) === message
 
 
 
