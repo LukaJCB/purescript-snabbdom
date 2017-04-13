@@ -7,10 +7,10 @@ import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Random (RANDOM)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
+import Control.Monad.Maybe.Trans (MaybeT(..), lift, runMaybeT)
 import DOM (DOM)
 import DOM.HTML (window)
-import DOM.HTML.Document (body)
-import DOM.HTML.Types (htmlDocumentToDocument, htmlElementToNode)
+import DOM.HTML.Types (htmlDocumentToDocument)
 import DOM.HTML.Window (document)
 import DOM.Node.Document (createElement)
 import DOM.Node.Node (appendChild, textContent)
@@ -25,18 +25,21 @@ import Test.Unit.Assert (assert)
 import Test.Unit.Console (TESTOUTPUT)
 import Test.Unit.Main (exit, runTest)
 import Test.Unit.QuickCheck (quickCheck)
-import Unsafe.Coerce (unsafeCoerce)
 
 patchAndGetElement :: forall e. VNodeProxy (dom :: DOM | e) -> Eff (dom:: DOM, vdom :: VDOM | e) (Maybe Element)
 patchAndGetElement proxy = do
   wndow <- window
   doc <- document wndow
-  node <- createElement "div" (htmlDocumentToDocument doc)
-  bdy <- body doc
-  _ <- appendChild (elementToNode node) (htmlElementToNode (unsafeCoerce bdy))
-  patchInitial node proxy
-  elem <- (querySelector (QuerySelector "#msg") (documentToParentNode (htmlDocumentToDocument doc)))
-  pure elem
+
+  let htmlDoc = htmlDocumentToDocument doc
+      findInDocument queryStr = querySelector (QuerySelector queryStr) $ documentToParentNode htmlDoc
+
+  node <- createElement "div" htmlDoc
+  runMaybeT do
+    body <- MaybeT $ findInDocument "body"
+    _ <- lift $ appendChild (elementToNode node) (elementToNode body)
+    lift $ patchInitial node proxy
+    MaybeT $ findInDocument "#msg"
 
 
 main :: Eff (console :: CONSOLE, testOutput :: TESTOUTPUT, avar :: AVAR, dom :: DOM, vdom :: VDOM, random :: RANDOM) Unit
