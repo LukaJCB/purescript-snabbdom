@@ -14,10 +14,9 @@ import DOM.HTML.Types (htmlDocumentToDocument, htmlElementToNode)
 import DOM.HTML.Window (document)
 import DOM.Node.Document (createElement)
 import DOM.Node.Node (appendChild, textContent)
-import DOM.Node.ParentNode (querySelector)
+import DOM.Node.ParentNode (querySelector, QuerySelector(..))
 import DOM.Node.Types (Element, documentToParentNode, elementToNode)
 import Data.Maybe (Maybe(..), isJust, maybe)
-import Data.Nullable (toMaybe)
 import Data.StrMap (empty)
 import Snabbdom (VDOM, VNodeProxy, h, patchInitial, text, toVNodeEventObject, toVNodeHookObjectProxy)
 import Test.QuickCheck (Result(..), (===))
@@ -34,10 +33,10 @@ patchAndGetElement proxy = do
   doc <- document wndow
   node <- createElement "div" (htmlDocumentToDocument doc)
   bdy <- body doc
-  appendChild (elementToNode node) (htmlElementToNode (unsafeCoerce bdy))
+  _ <- appendChild (elementToNode node) (htmlElementToNode (unsafeCoerce bdy))
   patchInitial node proxy
-  elem <- (querySelector "#msg" (documentToParentNode (htmlDocumentToDocument doc)))
-  pure (toMaybe elem)
+  elem <- (querySelector (QuerySelector "#msg") (documentToParentNode (htmlDocumentToDocument doc)))
+  pure elem
 
 
 main :: Eff (console :: CONSOLE, testOutput :: TESTOUTPUT, avar :: AVAR, dom :: DOM, vdom :: VDOM, random :: RANDOM) Unit

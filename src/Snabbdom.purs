@@ -1,6 +1,6 @@
 module Snabbdom where
 
-import Control.Monad.Eff (Eff)
+import Control.Monad.Eff (Eff, kind Effect)
 import DOM.Node.Types (Element)
 import Data.Maybe (Maybe(..))
 import Data.StrMap (StrMap)
@@ -27,7 +27,7 @@ type VNodeData e =
   , hook :: VNodeHookObjectProxy e
   }
 
-foreign import data VNodeEventObject :: # ! -> *
+foreign import data VNodeEventObject :: # Effect -> Type
 
 -- | Transform a StrMap representing a VNodeEventObject into its native counter part
 foreign import toVNodeEventObject :: forall a e. StrMap (a -> Eff e Unit) -> VNodeEventObject e
@@ -50,12 +50,12 @@ foreign import getElementImpl :: forall a e. VNodeProxy e -> (a -> Maybe a) -> M
 getElement :: forall e. VNodeProxy e -> Maybe Element
 getElement proxy = getElementImpl proxy Just Nothing
 
-foreign import data VNodeHookObjectProxy :: # ! -> *
+foreign import data VNodeHookObjectProxy :: # Effect -> Type
 
 -- | Transform a VNodeHookObject into its native counter part
 foreign import toVNodeHookObjectProxy :: forall e. VNodeHookObject e -> VNodeHookObjectProxy e
 
-foreign import data VDOM :: !
+foreign import data VDOM :: Effect
 
 -- | The patch function returned by init takes two arguments.
 -- | The first is a DOM element or a vnode representing the current view.
