@@ -7,7 +7,7 @@ import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Random (RANDOM)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
-import Control.Monad.Maybe.Trans (MaybeT(..), lift, runMaybeT)
+import Control.Monad.Maybe.Trans (lift, runMaybeT)
 import DOM (DOM)
 import DOM.HTML (window)
 import DOM.HTML.Types (htmlDocumentToDocument)
@@ -17,6 +17,7 @@ import DOM.Node.Node (appendChild, textContent)
 import DOM.Node.ParentNode (querySelector, QuerySelector(..))
 import DOM.Node.Types (Element, documentToParentNode, elementToNode)
 import Data.Maybe (Maybe(..), isJust, maybe)
+import Data.Newtype (wrap)
 import Data.StrMap (empty)
 import Snabbdom (VDOM, VNodeProxy, h, patchInitial, text, toVNodeEventObject, toVNodeHookObjectProxy)
 import Test.QuickCheck (Result(..), (===))
@@ -36,10 +37,10 @@ patchAndGetElement proxy = do
 
   node <- createElement "div" htmlDoc
   runMaybeT do
-    body <- MaybeT $ findInDocument "body"
+    body <- wrap $ findInDocument "body"
     _ <- lift $ appendChild (elementToNode node) (elementToNode body)
     lift $ patchInitial node proxy
-    MaybeT $ findInDocument "#msg"
+    wrap $ findInDocument "#msg"
 
 
 main :: Eff (console :: CONSOLE, testOutput :: TESTOUTPUT, avar :: AVAR, dom :: DOM, vdom :: VDOM, random :: RANDOM) Unit
