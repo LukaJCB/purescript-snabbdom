@@ -1,9 +1,9 @@
 module Snabbdom where
 
-import Control.Monad.Eff (Eff, kind Effect)
-import DOM.Node.Types (Element)
+import Effect (Effect)
+import Web.DOM.Element (Element)
 import Data.Maybe (Maybe(..))
-import Data.StrMap (StrMap)
+import Data.Map (Map)
 import Data.Unit (Unit)
 
 newtype VNodeProxy e = VNodeProxy
@@ -22,15 +22,15 @@ newtype VNodeProxy e = VNodeProxy
 -- | Snabbdom offers a rich selection of hooks.
 -- | Hooks are used both by modules to extend Snabbdom, and in normal code for executing arbitrary code at desired points in the life of a virtual node.
 type VNodeData e =
-  { attrs :: StrMap String
+  { attrs :: Map String String
   , on :: VNodeEventObject e
   , hook :: VNodeHookObjectProxy e
   }
 
-foreign import data VNodeEventObject :: # Effect -> Type
+foreign import data VNodeEventObject :: (Type -> Type) -> Type
 
--- | Transform a StrMap representing a VNodeEventObject into its native counter part
-foreign import toVNodeEventObject :: forall a e. StrMap (a -> Eff e Unit) -> VNodeEventObject e
+-- | Transform a Map String representing a VNodeEventObject into its native counter part
+foreign import toVNodeEventObject :: forall a e. Map String (a -> Effect Unit) -> VNodeEventObject e
 
 -- | The insert hook is invoked once the DOM element for a vnode has been inserted into the document and the rest of the patch cycle is done.
 -- | This means that you can do DOM measurements (like using getBoundingClientRect in this hook safely, knowing that no elements will be changed afterwards that could affect the position of the inserted elements.
@@ -39,9 +39,9 @@ foreign import toVNodeEventObject :: forall a e. StrMap (a -> Eff e Unit) -> VNo
 -- |
 -- | The update hook is invoked whenever an element is being updated
 type VNodeHookObject e =
-  { insert :: Maybe (VNodeProxy e -> Eff e Unit)
-  , destroy :: Maybe (VNodeProxy e -> Eff e Unit)
-  , update :: Maybe (VNodeProxy e -> VNodeProxy e -> Eff e Unit)
+  { insert :: Maybe (VNodeProxy e -> Effect Unit)
+  , destroy :: Maybe (VNodeProxy e -> Effect Unit)
+  , update :: Maybe (VNodeProxy e -> VNodeProxy e -> Effect Unit)
   }
 
 foreign import getElementImpl :: forall a e. VNodeProxy e -> (a -> Maybe a) -> Maybe a -> Maybe Element
@@ -50,12 +50,12 @@ foreign import getElementImpl :: forall a e. VNodeProxy e -> (a -> Maybe a) -> M
 getElement :: forall e. VNodeProxy e -> Maybe Element
 getElement proxy = getElementImpl proxy Just Nothing
 
-foreign import data VNodeHookObjectProxy :: # Effect -> Type
+foreign import data VNodeHookObjectProxy :: (Type -> Type) -> Type
 
 -- | Transform a VNodeHookObject into its native counter part
 foreign import toVNodeHookObjectProxy :: forall e. VNodeHookObject e -> VNodeHookObjectProxy e
 
-foreign import data VDOM :: Effect
+foreign import data VDOM :: (Type -> Type)
 
 -- | The patch function returned by init takes two arguments.
 -- | The first is a DOM element or a vnode representing the current view.
@@ -66,13 +66,13 @@ foreign import data VDOM :: Effect
 -- | This is necessary since Snabbdom stores information in the vnode.
 -- | This makes it possible to implement a simpler and more performant architecture.
 -- | This also avoids the creation of a new old vnode tree.
-foreign import patch :: forall e. VNodeProxy e -> VNodeProxy e -> Eff (vdom :: VDOM | e) Unit
+foreign import patch :: forall e. VNodeProxy e -> VNodeProxy e -> Effect Unit
 
 -- | Same as patch, but patches an initial DOM Element instead.
-foreign import patchInitial :: forall e. Element -> VNodeProxy e -> Eff (vdom :: VDOM | e) Unit
+foreign import patchInitial :: forall e. Element -> VNodeProxy e -> Effect Unit
 
 -- | Same as patch initial, but takes a selector instead of a DOM Element.
-foreign import patchInitialSelector :: forall e. String -> VNodeProxy e -> Eff (vdom :: VDOM | e) Unit
+foreign import patchInitialSelector :: forall e. String -> VNodeProxy e -> Effect Unit
 
 -- | Turns a String into a VNode
 foreign import text :: forall e. String -> VNodeProxy (|e)
@@ -82,4 +82,4 @@ foreign import text :: forall e. String -> VNodeProxy (|e)
 foreign import h :: forall e. String -> VNodeData e -> Array (VNodeProxy e) -> VNodeProxy e
 
 -- | A hook that updates the value whenever it's attribute gets updated.
-foreign import updateValueHook :: forall e. VNodeProxy e -> VNodeProxy e -> Eff e Unit
+foreign import updateValueHook :: forall e. VNodeProxy e -> VNodeProxy e -> Effect Unit
