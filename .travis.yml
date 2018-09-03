@@ -5,4 +5,8 @@ node_js:
 
 before_script:
   - npm install -g pulp bower purescript
+  - npm install snabbdom
   - bower install
+
+script:
+  - npm test
