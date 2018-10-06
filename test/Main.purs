@@ -22,7 +22,7 @@ import Test.Unit.Assert (assert)
 import Test.Unit.Main (exit, runTest)
 import Test.Unit.QuickCheck (quickCheck)
 
-patchAndGetElement :: forall e. VNodeProxy e -> Effect (Maybe Element)
+patchAndGetElement :: VNodeProxy -> Effect (Maybe Element)
 patchAndGetElement proxy = do
   wndow <- window
   doc <- document wndow
@@ -59,7 +59,7 @@ compareTextContent message element =
 
 
 
-createVNode :: forall e. String ->  VNodeProxy (| e)
+createVNode :: String -> VNodeProxy
 createVNode message = h "strong#msg" { attrs : empty
   , on : toVNodeEventObject empty
   , hook : toVNodeHookObjectProxy { insert : Nothing, update : Nothing, destroy : Nothing}
